@@ -2,8 +2,7 @@
 
 [![Latest Stable Version](https://poser.pugx.org/torann/modules/v/stable.png)](https://packagist.org/packages/torann/modules) [![Total Downloads](https://poser.pugx.org/torann/modules/downloads.png)](https://packagist.org/packages/torann/modules)
 
-
-Laravel implantation of [Skosh](https://github.com/Torann/skosh)'s Twig templating engine for use in a multi-tenant environment.
+Basic module implantation for Laravel.
 
 - [Modules on Packagist](https://packagist.org/packages/torann/modules)
 - [Modules on GitHub](https://github.com/torann/modules)

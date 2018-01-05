@@ -1,13 +1,12 @@
 {
     "name": "torann/modules",
-    "description": "Basic module structure for Laravel",
+    "description": "Basic module implantation for Laravel",
     "authors": [
         {
             "name": "Daniel Stainback",
             "email": "torann@gmail.com"
         }
     ],
-    "license": "BSD 2-Clause",
     "keywords": [
         "modules",
         "laravel modules",
