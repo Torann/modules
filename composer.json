@@ -1,6 +1,7 @@
 {
     "name": "torann/modules",
     "description": "Basic module implantation for Laravel",
+    "license": "BSD-2-Clause",
     "authors": [
         {
             "name": "Daniel Stainback",
