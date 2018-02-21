@@ -2,7 +2,6 @@
 
 namespace Torann\Modules;
 
-use Exception;
 use Illuminate\Support\Arr;
 use Illuminate\Contracts\Foundation\Application;
 
@@ -24,7 +23,7 @@ class Config
      * @param array $config
      * @param string $config_path
      */
-    public function __construct(array $config, $config_path)
+    public function __construct(array $config = null, $config_path)
     {
         $this->config = $config;
         $this->config_path = $config_path;
