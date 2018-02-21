@@ -21,7 +21,8 @@ class MigrationCommand extends AbstractCommand
                                 {module : Module name}
                                 {name : Migration full name (ex. create_users_table)}
                                 {--type= : Type of migration (default options: create, edit)}
-                                {--table= : Table name (use with --type)}';
+                                {--table= : Table name (use with --type)}
+                                {--tenant : Store in the tenant subdirectory}';
 
     /**
      * The console command description.
@@ -40,7 +41,7 @@ class MigrationCommand extends AbstractCommand
         $type = $this->option('type');
         $table = $this->option('table');
 
-        // verify whether both type and table used
+        // Verify whether both type and table used
         if ($type && !$table || $table && !$type) {
             throw new Exception('You need to use both options --type and --table when using any of them');
         }
@@ -48,7 +49,7 @@ class MigrationCommand extends AbstractCommand
         // verify whether module exists
         $modules = $this->verifyExisting(Collection::make((array)$module));
 
-        $this->createMigrationFile($modules->first(), $name, $type, $table);
+        $this->createMigrationFile($modules->first(), $name, $type, $table, $this->option('tenant'));
     }
 
     /**
@@ -58,10 +59,11 @@ class MigrationCommand extends AbstractCommand
      * @param string $name
      * @param string $type
      * @param string $table
+     * @param bool   $tenant
      *
      * @throws Exception
      */
-    protected function createMigrationFile(Module $module, $name, $type, $table)
+    protected function createMigrationFile(Module $module, $name, $type, $table, $tenant)
     {
         // Get stub file path
         $stub_file = $this->laravel['modules']->stubsPath(
@@ -76,12 +78,16 @@ class MigrationCommand extends AbstractCommand
         // Migration file name
         $filename = $this->getMigrationFileName($name);
 
-        $this->copyStubFileIntoModule($module, $stub_file,
-            $module->migrationsPath(true) . DIRECTORY_SEPARATOR . $filename, [
-                'migrationClass' => Str::studly($name),
-                'table' => $table,
-            ]
-        );
+        // Set module file path
+        $module_file = $module->migrationsPath(true)
+            . DIRECTORY_SEPARATOR
+            . ($tenant ? 'tenants' . DIRECTORY_SEPARATOR : '')
+            . $filename;
+
+        $this->copyStubFileIntoModule($module, $stub_file, $module_file, [
+            'migrationClass' => Str::studly($name),
+            'table' => $table,
+        ]);
 
         $this->info("[Module {$module->name()}] Created Migration: {$filename}");
     }

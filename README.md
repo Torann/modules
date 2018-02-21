@@ -110,6 +110,8 @@ artisan module:migration products create_camera_table --table=cameras --type=cre
 
 This will create migration that is of type `create` - so in `up` method there will be creating `cameras` table and in `down` method deleting `cameras` table
 
+> If the application supports multi-tenancy, the `--tenant` option can be used to store migration file in the tenant subdirectory of the module migration directory.
+
 ### module:cache
 
 Create a module cache file for faster module registration.
