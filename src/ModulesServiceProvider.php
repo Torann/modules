@@ -79,20 +79,9 @@ class ModulesServiceProvider extends ServiceProvider
         // Get base stub path
         $stub_path = realpath(__DIR__ . '/../resources/stubs');
 
-        // Here we get all stubs files from stubs templates directory
-        $published_path = $this->app['path.resources'] . DIRECTORY_SEPARATOR . 'stubs/modules';
-
-        // Determine all files to publish
-        foreach (glob($stub_path . '/{,.}*.stub', GLOB_BRACE) as $file) {
-
-            // Remove stub path prefix
-            $relative_path = preg_replace('/^' . preg_quote($stub_path, '/') . '\//i', '', $file);
-
-            // Add the file for publishing
-            $this->publishes([
-                $file => $published_path . DIRECTORY_SEPARATOR . $relative_path,
-            ], 'stubs');
-        }
+        $this->publishes([
+            $stub_path => resource_path('stubs/modules'),
+        ], 'stubs');
     }
 
     /**
