@@ -3,6 +3,7 @@
 namespace Torann\Modules\Console;
 
 use Exception;
+use SplFileInfo;
 use Torann\Modules\Module;
 use Illuminate\Console\Command;
 use Torann\Modules\Traits\Replacer;
@@ -71,20 +72,6 @@ abstract class AbstractCommand extends Command
     }
 
     /**
-     * Creates module directories
-     *
-     * @param Module $module
-     */
-    protected function createModuleDirectories(Module $module)
-    {
-        $directories = $this->laravel['modules.config']->getStubMap('directories');
-
-        foreach ($directories as $directory) {
-            $this->createDirectory($module, $directory);
-        }
-    }
-
-    /**
      * Creates directory
      *
      * @param Module $module
@@ -126,24 +113,75 @@ abstract class AbstractCommand extends Command
         // Determine replacements
         $replacements = $sub_module ? ['class' => $sub_module] : [];
 
-        // Get the stub mapping for files
-        $files = $this->laravel['modules.config']->getStubMap(
-            $sub_module ? 'submodule_files' : 'files'
-        );
-
-        foreach ($files as $module_file => $stub_file) {
-            $this->copyStubFileIntoModule($module, $stub_file,
-                $module_file, $replacements);
+        foreach ($this->getModuleFiles($sub_module) as $source=>$destination) {
+            $this->copyStubFileIntoModule(
+                $module,
+                $source,
+                $destination,
+                $replacements
+            );
         }
 
         return true;
     }
 
     /**
+     * Create files inside given module
+     *
+     * @param string $sub_module
+     * @param array  $files
+     *
+     * @return array
+     */
+    protected function getModuleFiles($sub_module = null, array $files = [])
+    {
+        // If this is not a submodule then just return an
+        // array of all of the module stub files.
+        if ($sub_module === null) {
+            $values = $this->files->allFiles(
+                $this->laravel['modules']->stubsPath('module'),
+                true
+            );
+        }
+
+        // Map all of the submodule files to absolute paths
+        else {
+            $values = array_map(function($file) {
+
+                // Check for an override file in the submodule stub directory.
+                if (file_exists(
+                    $override = $this->laravel['modules']->stubsPath("submodule/{$file}")
+                )) {
+                    return $override;
+                }
+
+                return $this->laravel['modules']->stubsPath("module/{$file}");
+            }, $this->laravel['modules.config']->get('submodule'));
+        }
+
+        // Create a regex friendly version of the stubs path
+        $path = preg_quote($this->laravel['modules']->stubsPath(), DIRECTORY_SEPARATOR);
+
+        foreach ($values as $file) {
+
+            // Just get the file path
+            $file = ($file instanceof SplFileInfo) ? $file->getPathname() : $file;
+
+            // Ignore all non-stub extension files
+            if (substr(basename($file), -5) !== '.stub') continue;
+
+            // Map the file as source and destination
+            $files[$file] = preg_replace("/^{$path}\/(module|submodule)\//i", '', $file);
+        }
+
+        return $files;
+    }
+
+    /**
      * Copy single stub file into module
      *
      * @param Module $module
-     * @param string $stub_file
+     * @param string $stub_path
      * @param string $module_file
      * @param array  $replacements
      *
@@ -151,18 +189,17 @@ abstract class AbstractCommand extends Command
      */
     protected function copyStubFileIntoModule(
         Module $module,
-        $stub_file,
+        $stub_path,
         $module_file,
-        array $replacements = []
-    )
+        array $replacements = [])
     {
-        $stub_path = $this->laravel['modules']->stubsPath($stub_file);
-
         if (!$this->exists($stub_path)) {
             throw new Exception("Stub file [{$stub_path}] does NOT exist");
         }
 
-        $module_file = $this->replace($module_file, $module, $replacements);
+        // Create the name of the new module file
+        $module_file = preg_replace('/\.stub$/i', '', $module_file);
+        $module_file = $this->replace($module_file, $module, $replacements, '%:key:%');
 
         if ($this->exists($module_file, $module)) {
             throw new Exception("[Module {$module->name()}] File {$module_file} already exists");

@@ -109,3 +109,23 @@ artisan module:migration products create_camera_table --table=cameras --type=cre
 ```
 
 This will create migration that is of type `create` - so in `up` method there will be creating `cameras` table and in `down` method deleting `cameras` table
+
+### module:cache
+
+Create a module cache file for faster module registration.
+
+Example usage:
+
+```php
+artisan module:cache
+```
+
+### module:clear
+
+Remove the module cache file.
+
+Example usage:
+
+```php
+artisan module:clear
+```

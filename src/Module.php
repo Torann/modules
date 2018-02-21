@@ -39,11 +39,7 @@ class Module
      * @param Application $application
      * @param array       $options
      */
-    public function __construct(
-        $name,
-        Application $application,
-        array $options = []
-    )
+    public function __construct($name, Application $application, array $options = [])
     {
         $this->name = $name;
         $this->options = Collection::make($options);
@@ -216,7 +212,9 @@ class Module
      */
     public function routesFilePath($suffix)
     {
-        return $this->getPath("routes{$suffix}.php.stub");
+        return $this->getPath('Route', [
+            'type' => $suffix,
+        ]);
     }
 
     /**
@@ -228,7 +226,7 @@ class Module
      */
     public function routeSuffix(array $data)
     {
-        return isset($data['type']) ? '_' . $data['type'] : '';
+        return isset($data['type']) ? $data['type'] : '';
     }
 
     /**
@@ -238,7 +236,7 @@ class Module
      */
     public function factoryFilePath()
     {
-        return $this->getPath('ModelFactory.php.stub');
+        return $this->getPath('ModelFactory');
     }
 
     /**
@@ -248,7 +246,7 @@ class Module
      */
     public function seederFilePath()
     {
-        return $this->getPath('DatabaseSeeder.php.stub');
+        return $this->getPath('DatabaseSeeder');
     }
 
     /**
@@ -258,20 +256,21 @@ class Module
      */
     public function serviceProviderFilePath()
     {
-        return $this->getPath('ServiceProvider.php.stub');
+        return $this->getPath('ServiceProvider');
     }
 
     /**
      * Get path
      *
      * @param string $file
+     * @param array  $replacements
      *
      * @return string
      */
-    protected function getPath($file)
+    protected function getPath($file, array $replacements = [])
     {
         return $this->directory() . DIRECTORY_SEPARATOR .
-            $this->replace($this->config->getFilePath($file), $this);
+            $this->replace($this->config->getFilePath($file), $this, $replacements, '%:key:%');
     }
 
     /**

@@ -1,5 +1,0 @@
-<?php
-
-Route::group([], function () {
-    Route::resource('{plural|lower}', '{class}Controller');
-});

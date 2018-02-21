@@ -31,6 +31,11 @@ class ModuleManager
     protected $stubs_path;
 
     /**
+     * @var array
+     */
+    protected $cache = [];
+
+    /**
      * Module manager constructor.
      *
      * @param Application $app
@@ -46,6 +51,31 @@ class ModuleManager
         if (file_exists($this->stubs_path) === false) {
             $this->stubs_path = realpath(__DIR__ . '/../resources/stubs');
         }
+
+        // Check cached
+        if (file_exists($this->getCachedPath())) {
+            $this->cache = require $this->getCachedPath();
+        }
+    }
+
+    /**
+     * Get the path to the routes cache file.
+     *
+     * @return string
+     */
+    public function getCachedPath()
+    {
+        return $this->app->bootstrapPath().'/cache/modules.php';
+    }
+
+    /**
+     * Clear the cached file.
+     *
+     * @return void
+     */
+    public function clearCache()
+    {
+        $this->cache = [];
     }
 
     /**
@@ -70,13 +100,14 @@ class ModuleManager
     public function loadRoutes(Registrar $router, $type = null)
     {
         $this->withRoutes($type)->each(function ($module) use ($router, $type) {
-
             /* @var Module $module */
             $router->group(['namespace' => $module->routingControllerNamespace()],
                 function ($router) use ($module, $type) {
-                    $this->app['files']->getRequire($this->app->basePath() .
+                    $this->app['files']->getRequire(
+                        $this->app->basePath() .
                         DIRECTORY_SEPARATOR .
-                        $module->routesFilePath($module->routeSuffix(compact('type'))));
+                        $module->routesFilePath($module->routeSuffix(compact('type')))
+                    );
                 });
         });
     }
@@ -90,7 +121,8 @@ class ModuleManager
     {
         $this->withFactories()->each(function ($module) use ($factory) {
             /* @var Module $module */
-            $this->loadFactoryFile($this->app->basePath() . DIRECTORY_SEPARATOR .
+            $this->loadFactoryFile(
+                $this->app->basePath() . DIRECTORY_SEPARATOR .
                 $module->factoryFilePath(), $factory);
         });
     }
@@ -113,9 +145,8 @@ class ModuleManager
      */
     public function loadServiceProviders()
     {
-        $this->withServiceProviders()->each(function ($module) {
-            /* @var Module $module */
-            $this->app->register($module->serviceProviderClass());
+        $this->withServiceProviders()->each(function ($service_provider) {
+            $this->app->register($service_provider);
         });
     }
 
@@ -149,7 +180,13 @@ class ModuleManager
      */
     public function withServiceProviders()
     {
-        return $this->filterActiveByMethod('hasServiceProvider');
+        if (empty($this->cache) === false) {
+            return new Collection($this->cache['service_providers']);
+        }
+
+        return $this->filterActiveByMethod('hasServiceProvider')->map(function ($module) {
+            return $module->serviceProviderClass();
+        });
     }
 
     /**
@@ -256,7 +293,7 @@ class ModuleManager
      *
      * @return string
      */
-    public function stubsPath($path)
+    public function stubsPath($path = '')
     {
         return rtrim($this->stubs_path, DIRECTORY_SEPARATOR)
             . ($path ? DIRECTORY_SEPARATOR . ltrim($path, DIRECTORY_SEPARATOR) : $path);

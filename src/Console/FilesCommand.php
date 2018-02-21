@@ -52,11 +52,7 @@ class FilesCommand extends AbstractCommand
      */
     protected function createSubModule(Module $module, $sub_module)
     {
-        // first create directories
-        $this->createModuleDirectories($module);
-
-        // now create files
-        $status = $this->createModuleFiles($module, $sub_module, true);
+        $status = $this->createModuleFiles($module, $sub_module);
 
         if ($status) {
             $this->info("[Module {$module->name()}] Submodule {$sub_module} was created.");

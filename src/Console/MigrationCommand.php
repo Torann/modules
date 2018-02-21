@@ -64,10 +64,12 @@ class MigrationCommand extends AbstractCommand
     protected function createMigrationFile(Module $module, $name, $type, $table)
     {
         // Get stub file path
-        $stub_file = 'migration' . ($type ? '_' : '') . $type . '.php.stub';
+        $stub_file = $this->laravel['modules']->stubsPath(
+            'migrations/migration' . ($type ? '_' : '') . $type . '.php.stub'
+        );
 
         // Validate stub file
-        if (file_exists($this->laravel['modules']->stubsPath($stub_file)) === false) {
+        if (file_exists($stub_file) === false) {
             throw new Exception("There is no [{$type}] type for migrations");
         }
 
@@ -81,7 +83,7 @@ class MigrationCommand extends AbstractCommand
             ]
         );
 
-        $this->info("[Module {$module->name()}] Created migration file: {$filename}");
+        $this->info("[Module {$module->name()}] Created Migration: {$filename}");
     }
 
     /**

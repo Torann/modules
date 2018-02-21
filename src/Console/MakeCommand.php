@@ -66,10 +66,6 @@ class MakeCommand extends AbstractCommand
      */
     protected function createModule(Module $module)
     {
-        // first create directories
-        $this->createModuleDirectories($module);
-
-        // now create files
         $this->createModuleFiles($module);
 
         // Finally add module to configuration (if not disabled in config)

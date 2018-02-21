@@ -4,9 +4,6 @@ namespace Torann\Modules;
 
 use Illuminate\Support\Collection;
 use Illuminate\Support\ServiceProvider;
-use Torann\Modules\Console\MakeCommand;
-use Torann\Modules\Console\FilesCommand;
-use Torann\Modules\Console\MigrationCommand;
 
 class ModulesServiceProvider extends ServiceProvider
 {
@@ -106,9 +103,11 @@ class ModulesServiceProvider extends ServiceProvider
     public function registerModuleCommands()
     {
         $this->commands([
-            FilesCommand::class,
-            MakeCommand::class,
-            MigrationCommand::class,
+            Console\FilesCommand::class,
+            Console\MakeCommand::class,
+            Console\MigrationCommand::class,
+            Console\CacheCommand::class,
+            Console\ClearCommand::class,
         ]);
     }
 

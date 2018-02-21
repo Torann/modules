@@ -1,0 +1,17 @@
+<?php
+
+namespace {namespace}\{moduleNamespace}\Repositories;
+
+use Illuminate\Contracts\Container\Container;
+use {namespace}\{moduleNamespace}\Models\{class};
+use Torann\LaravelRepository\Repositories\AbstractRepository;
+
+class {class}Repository extends AbstractRepository
+{
+    /**
+     * Specify Model class name
+     *
+     * @return string
+     */
+    protected $model = {class}::class;
+}
